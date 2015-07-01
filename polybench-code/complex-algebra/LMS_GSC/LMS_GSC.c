@@ -171,7 +171,7 @@ int main(int argc, char** argv)
   polybench_start_instruments;
 
   /* Run kernel. */
-  for (unsigned int i = 0 ; i < N ; i++)
+  for (i = 0 ; i < N ; i++)
   {
     kernel_LMS_GSC (k,
         mu,
