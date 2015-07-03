@@ -11,6 +11,21 @@
 #include "LMS.h"
 
 
+/* Array update. */
+static
+void update_array(int n,
+    DATA_TYPE POLYBENCH_1D(x_r, N, n),
+    DATA_TYPE POLYBENCH_1D(x_i, N, n))
+{
+  unsigned int i = 0;
+
+  for(i = 0 ; i<n ; i++)
+  {
+    x_r[i] = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
+    x_i[i] = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
+  }
+}
+
 /* Array initialization. */
 static
 void init_array(int n, int m,
@@ -40,9 +55,6 @@ void init_array(int n, int m,
 
   for(i = 0 ; i<n ; i++)
   {
-    x_r[i] = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
-    x_i[i] = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
-
     wq_r[i] = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
     wq_i[i] = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
 
@@ -56,35 +68,17 @@ void init_array(int n, int m,
     }
   }
   
+  update_array(n,
+      x_r,
+      x_i);
+
+  
   //1. w_a(0) = 0
   for (j = 0 ; j<(n-m) ; j++)
   {
     wa_r[i] = 0.0;
     wa_i[i] = 0.0;
   }
-
-  //Not really initialization, I think it should be move to the kernel
-  //2. y_c(k) = w_q^{H} * x(k)
-  for( i = 0 ; i<n ; i++)
-  {
-    *yc_r += (wq_r[i] * x_r[i]) - ((-wq_i[i]) * x_i[i]);
-    *yc_i += ((-wq_i[i]) * x_r[i]) + (wq_r[i] * x_i[i]);
-    
-  }
-
-  //3. z(k) = B^{H} * x(k)
-  for (j = 0 ; j<(n-m) ; j++)
-  {
-    z_r[j] = 0.0;
-    z_i[j] = 0.0;
-
-    for(i = 0 ; i<n ; i++)
-    {
-      z_r[j] += (B_r[i][j] * x_r[i]) - ((-B_i[i][j]) * x_i[i]);
-      z_i[j] += ((-B_i[i][j]) * x_r[i]) + (B_r[i][j] * x_i[i]);
-    }
-  }
-
 }
 
 
@@ -113,8 +107,8 @@ void print_array(int n,
    including the call and return. */
 static
 void kernel_LMS_GSC(int n, int m,
-    /*DATA_TYPE POLYBENCH_1D(x_r, N, n),*/
-    /*DATA_TYPE POLYBENCH_1D(x_i, N, n),*/
+    DATA_TYPE POLYBENCH_1D(x_r, N, n),
+    DATA_TYPE POLYBENCH_1D(x_i, N, n),
     DATA_TYPE POLYBENCH_1D(wq_r, N, n),
     DATA_TYPE POLYBENCH_1D(wq_i, N, n),
     DATA_TYPE POLYBENCH_2D(B_r, N, N-m, n, n-m),
@@ -139,6 +133,26 @@ void kernel_LMS_GSC(int n, int m,
   DATA_TYPE Bwa_i = 0;
 
 #pragma scop
+  //2. y_c(k) = w_q^{H} * x(k)
+  for( i = 0 ; i<n ; i++)
+  {
+    *yc_r += (wq_r[i] * x_r[i]) - ((-wq_i[i]) * x_i[i]);
+    *yc_i += ((-wq_i[i]) * x_r[i]) + (wq_r[i] * x_i[i]);
+    
+  }
+
+  //3. z(k) = B^{H} * x(k)
+  for (j = 0 ; j<(n-m) ; j++)
+  {
+    z_r[j] = 0.0;
+    z_i[j] = 0.0;
+
+    for(i = 0 ; i<n ; i++)
+    {
+      z_r[j] += (B_r[i][j] * x_r[i]) - ((-B_i[i][j]) * x_i[i]);
+      z_i[j] += ((-B_i[i][j]) * x_r[i]) + (B_r[i][j] * x_i[i]);
+    }
+  }
 
   //4. y_p(k) = y_c(k) - w_a^H(k-1) * z(k)
   for (i = 0 ; i < (n-m) ; i++)
@@ -229,9 +243,15 @@ int main(int argc, char** argv)
   /* Run kernel. */
   for (i = 0 ; i < NB_RUN ; i++)
   {
+    //Just comment this function call if you don't want to 
+    //update/modify the input data (x vector) of the radio.
+    update_array(n,
+        POLYBENCH_ARRAY(x_r),
+        POLYBENCH_ARRAY(x_i));
+
     kernel_LMS_GSC (n, m,
-        /*POLYBENCH_ARRAY(x_r),*/
-        /*POLYBENCH_ARRAY(x_i),*/
+        POLYBENCH_ARRAY(x_r),
+        POLYBENCH_ARRAY(x_i),
         POLYBENCH_ARRAY(wq_r),
         POLYBENCH_ARRAY(wq_i),
         POLYBENCH_ARRAY(B_r),
