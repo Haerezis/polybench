@@ -74,7 +74,7 @@ void init_array(int n, int m,
 
   
   //1. w_a(0) = 0
-  for (j = 0 ; j<(n-m) ; j++)
+  for (i = 0 ; i<(n-m) ; i++)
   {
     wa_r[i] = 0.0;
     wa_i[i] = 0.0;

@@ -29,8 +29,8 @@ void init_array(int k, int p,
 {
   unsigned int l = 0, c = 0;
 
-  d_r = ((float)(rand()+1)/(float)(RAND_MAX)) * 10;
-  d_i = ((float)(rand()+1)/(float)(RAND_MAX)) * 10;
+  d_r = ((float)(rand()+1)/(float)(RAND_MAX)) * 10.0;
+  d_i = ((float)(rand()+1)/(float)(RAND_MAX)) * 10.0;
   *e_r = 0.0;
   *e_i = 0.0;
 
@@ -45,11 +45,11 @@ void init_array(int k, int p,
       //It is declared and intialize here, but is useless.
       //We kept it if in the future we want to implement
       //completely the algorithm
-      V_r[l][c] = ((float)(rand()+1)/(float)(RAND_MAX)) * 10;
-      V_i[l][c] = ((float)(rand()+1)/(float)(RAND_MAX)) * 10;
+      V_r[l][c] = ((float)(rand()+1)/(float)(RAND_MAX)) * 10.0;
+      V_i[l][c] = ((float)(rand()+1)/(float)(RAND_MAX)) * 10.0;
 
-      X_r[l][c] = ((float)(rand()+1)/(float)(RAND_MAX)) * 10;
-      X_i[l][c] = ((float)(rand()+1)/(float)(RAND_MAX)) * 10;
+      X_r[l][c] = ((float)(rand()+1)/(float)(RAND_MAX)) * 10.0;
+      X_i[l][c] = ((float)(rand()+1)/(float)(RAND_MAX)) * 10.0;
       
       W_r[l][c] = 0.0;
       W_i[l][c] = 0.0;
@@ -88,7 +88,7 @@ void kernel_LMS_GSC(int k, int mu, int p,
     DATA_TYPE * e_r,
     DATA_TYPE * e_i)
 {
-  unsigned int i = 0, pp = 0;
+  unsigned int i = 0, j = 0;
 
   unsigned yy_r = 0;
   unsigned yy_i = 0;
@@ -98,10 +98,10 @@ void kernel_LMS_GSC(int k, int mu, int p,
   {
     y_r[i] = 0;
     y_i[i] = 0;
-    for (pp = 0 ; pp < (p-1) ; pp++)
+    for (j = 0 ; j < (p-1) ; j++)
     {
-      y_r[i] += W_r[i][pp]*X_r[i][pp] - (-W_i[i][pp])*X_i[i][pp];
-      y_i[i] += (-W_i[i][pp])*X_r[i][pp] + W_r[i][pp]*X_i[i][pp];
+      y_r[i] += W_r[i][j]*X_r[i][j] - (-W_i[i][j])*X_i[i][j];
+      y_i[i] += (-W_i[i][j])*X_r[i][j] + W_r[i][j]*X_i[i][j];
     }
     yy_r += y_r[i];
     yy_i += y_i[i];
@@ -111,10 +111,10 @@ void kernel_LMS_GSC(int k, int mu, int p,
 
   for (i = 0 ; i < k ; i++)
   {
-    for (pp = 0 ; pp <(p-1) ; pp++)
+    for (j = 0 ; j <(p-1) ; j++)
     {
-      W_r[i][pp] = W_r[i][pp] + mu * (X_r[i][pp] * (*e_r) - X_i[i][pp] * (-*e_i));
-      W_i[i][pp] = W_i[i][pp] + mu * (X_r[i][pp] * (-*e_i) - X_i[i][pp] * (*e_r));
+      W_r[i][j] = W_r[i][j] + mu * (X_r[i][j] * (*e_r) - X_i[i][j] * (-*e_i));
+      W_i[i][j] = W_i[i][j] + mu * (X_r[i][j] * (-*e_i) - X_i[i][j] * (*e_r));
     }
   }
 
