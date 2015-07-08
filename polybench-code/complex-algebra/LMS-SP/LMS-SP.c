@@ -178,10 +178,14 @@ void kernel_LMS_GSC(int n, int m,
   }
 
   //6. if ||w_a(k)||² > β² , then w_a(k) = w_a(k) * ( BETA / ||w_a(k)||)
-  if (wa_norm > BETA*BETA)
+  //This if doesn't fit the polyhedral model
+  /*if (wa_norm > BETA*BETA)*/
   {
-    wa_r[i] = wa_r[i] * ( BETA / wa_norm );
-    wa_i[i] = wa_i[i] * ( BETA / wa_norm );
+    for (i = 0 ; i < (n-m) ; i++)
+    {
+      wa_r[i] = wa_r[i] * ( BETA / wa_norm );
+      wa_i[i] = wa_i[i] * ( BETA / wa_norm );
+    }
   }
 
   //7. w(k) = w_q - B * w_a(k)
