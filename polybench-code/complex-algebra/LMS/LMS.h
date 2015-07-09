@@ -2,10 +2,7 @@
 #define __LMS_H
 
 /* Constant value */
-//N corresponds to the number of sensor
-#define N 1000
-//M corresponds to the number of linear constraint in the system
-#define M 100
+#define NB_RUN 100
 
 //ALPHA is a positive constant that controls the convergence speed of the algo.
 #define ALPHA 4.2
@@ -49,29 +46,36 @@
 #  define LARGE_DATASET
 # endif
 
-# if !defined(NB_RUN)
+//N corresponds to the number of sensor
+//M corresponds to the number of linear constraint in the system
+# if !defined(N) || !defined(M)
 /* Define sample dataset sizes. */
 #  ifdef MINI_DATASET
-#   define NB_RUN 10
+#   define N 20
+#   define M 5
 #  endif 
 
 #  ifdef SMALL_DATASET
-#   define NB_RUN 50
+#   define N 100
+#   define M 20
 #  endif 
 
 #  ifdef MEDIUM_DATASET
-#   define NB_RUN 400
+#   define N 400
+#   define M 100
 #  endif 
 
 #  ifdef LARGE_DATASET
-#   define NB_RUN 1000
+#   define N 750
+#   define M 180
 #  endif 
 
 #  ifdef EXTRALARGE_DATASET
-#   define NB_RUN 10000
+#   define N 1000
+#   define M 250
 #  endif 
 
-#endif /* !(NB_RUN) */
+#endif /* !(N) || !(M) */
 
 
 #endif
