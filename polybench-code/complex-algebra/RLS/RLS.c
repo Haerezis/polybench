@@ -43,10 +43,10 @@ void init_array(int n, int m,
     DATA_TYPE POLYBENCH_1D(Pz_i, N-M, n-m),
     DATA_TYPE POLYBENCH_1D(g_r, N-M, n-m),
     DATA_TYPE POLYBENCH_1D(g_i, N-M, n-m),
-    DATA_TYPE POLYBENCH_2D(gz_r, N, N-M, n, n-m),
-    DATA_TYPE POLYBENCH_2D(gz_i, N, N-M, n, n-m),
-    DATA_TYPE POLYBENCH_2D(P_r, N, N-M, n, n-m),
-    DATA_TYPE POLYBENCH_2D(P_i, N, N-M, n, n-m),
+    DATA_TYPE POLYBENCH_2D(gz_r, N-M, N-M, n-m, n-m),
+    DATA_TYPE POLYBENCH_2D(gz_i, N-M, N-M, n-m, n-m),
+    DATA_TYPE POLYBENCH_2D(P_r, N-M, N-M, n-m, n-m),
+    DATA_TYPE POLYBENCH_2D(P_i, N-M, N-M, n-m, n-m),
     DATA_TYPE POLYBENCH_1D(wa_r, N-M, n-m),
     DATA_TYPE POLYBENCH_1D(wa_i, N-M, n-m),
     DATA_TYPE * yp_r,
@@ -152,10 +152,10 @@ void kernel_LMS_GSC(int n, int m,
     DATA_TYPE POLYBENCH_1D(Pz_i, N-M, n-m),
     DATA_TYPE POLYBENCH_1D(g_r, N-M, n-m),
     DATA_TYPE POLYBENCH_1D(g_i, N-M, n-m),
-    DATA_TYPE POLYBENCH_2D(gz_r, N, N-M, n, n-m),
-    DATA_TYPE POLYBENCH_2D(gz_i, N, N-M, n, n-m),
-    DATA_TYPE POLYBENCH_2D(P_r, N, N-M, n, n-m),
-    DATA_TYPE POLYBENCH_2D(P_i, N, N-M, n, n-m),
+    DATA_TYPE POLYBENCH_2D(gz_r, N-M, N-M, n-m, n-m),
+    DATA_TYPE POLYBENCH_2D(gz_i, N-M, N-M, n-m, n-m),
+    DATA_TYPE POLYBENCH_2D(P_r, N-M, N-M, n-m, n-m),
+    DATA_TYPE POLYBENCH_2D(P_i, N-M, N-M, n-m, n-m),
     DATA_TYPE POLYBENCH_1D(wa_r, N-M, n-m),
     DATA_TYPE POLYBENCH_1D(wa_i, N-M, n-m),
     DATA_TYPE * yp_r,
@@ -217,8 +217,8 @@ void kernel_LMS_GSC(int n, int m,
     Pz_i[i] = 0.0;
     for (j = 0 ; j < (n-m) ; j++)
     {
-      Pz_r[i] += (P_r[i][j] * z_r[j]) - (P_i[i][j] * z_i[j]);
-      Pz_i[i] += (P_r[i][j] * z_i[j]) + (P_i[i][j] * z_r[j]);
+      Pz_r[i] += (P_r[j][i] * z_r[j]) - (P_i[j][i] * z_i[j]);
+      Pz_i[i] += (P_r[j][i] * z_i[j]) + (P_i[j][i] * z_r[j]);
     }
   }
   for (i = 0 ; i < (n-m) ; i++)
@@ -226,19 +226,17 @@ void kernel_LMS_GSC(int n, int m,
     tmp_r += (z_r[i] * Pz_r[i]) - ((-z_i[i]) * Pz_i[i]);
     tmp_i += (-z_i[i])*Pz_r[i] + z_r[i]*Pz_i[i];
   }
+  tmp_r += MU;
+  tmp_i += MU;
   tmp_norm_pow2 = tmp_r * tmp_r + tmp_i * tmp_i;
 
 
   for (i = 0 ; i < (n-m) ; i++)
   {
-    g_r[i] = 0.0;
-    g_i[i] = 0.0;
     for (j = 0 ; j < (n-m) ; j++)
     {
-      g_r[i] += (P_r[i][j] * z_r[j]) - (P_i[i][j] * z_i[j]);
-      g_r[i] = ((g_r[i] * tmp_r) - (g_i[i] * tmp_i)) / tmp_norm_pow2;
-      g_i[i] += (P_r[i][j] * z_i[j]) + (P_i[i][j] * z_r[j]);
-      g_i[i] += ((g_r[i] * tmp_i) + (g_i[i] * tmp_r)) / tmp_norm_pow2;
+      g_r[i] = ((Pz_r[i] * tmp_r) - (Pz_i[i] * (-tmp_i))) / tmp_norm_pow2;
+      g_i[i] = ((Pz_r[i] * (-tmp_i)) + (Pz_i[i] * tmp_r)) / tmp_norm_pow2;
     }
   }
 
@@ -260,11 +258,11 @@ void kernel_LMS_GSC(int n, int m,
       gPz_i = 0.0;
       for (k = 0 ; k< (n-m) ; k++)
       {
-        gPz_r += (gz_r[i][k] * P_r[k][j]) - (gz_i[i][k] * P_i[k][j]);
-        gPz_r += (gz_r[i][k] * P_i[k][j]) - (gz_i[i][k] * P_r[k][j]);
+        gPz_r += (gz_r[i][k] * P_r[j][k]) - (gz_i[i][k] * P_i[j][k]);
+        gPz_r += (gz_r[i][k] * P_i[j][k]) - (gz_i[i][k] * P_r[j][k]);
       }
-      P_r[i][j] = (P_r[i][j] - gPz_r) / MU;
-      P_i[i][j] = (P_i[i][j] - gPz_i) / MU;
+      P_r[j][i] = (P_r[j][i] - gPz_r) / MU;
+      P_i[j][i] = (P_i[j][i] - gPz_i) / MU;
     }
   }
 
@@ -320,10 +318,10 @@ int main(int argc, char** argv)
   POLYBENCH_1D_ARRAY_DECL(Pz_i, DATA_TYPE, N-M, n-m);
   POLYBENCH_1D_ARRAY_DECL(g_r, DATA_TYPE, N-M, n-m);
   POLYBENCH_1D_ARRAY_DECL(g_i, DATA_TYPE, N-M, n-m);
-  POLYBENCH_2D_ARRAY_DECL(gz_r, DATA_TYPE, N, N-m, n, n-m);
-  POLYBENCH_2D_ARRAY_DECL(gz_i, DATA_TYPE, N, N-m, n, n-m);
-  POLYBENCH_2D_ARRAY_DECL(P_r, DATA_TYPE, N, N-m, n, n-m);
-  POLYBENCH_2D_ARRAY_DECL(P_i, DATA_TYPE, N, N-m, n, n-m);
+  POLYBENCH_2D_ARRAY_DECL(gz_r, DATA_TYPE, N, N-M, n-m, n-m);
+  POLYBENCH_2D_ARRAY_DECL(gz_i, DATA_TYPE, N, N-M, n-m, n-m);
+  POLYBENCH_2D_ARRAY_DECL(P_r, DATA_TYPE, N-M, N-M, n-m, n-m);
+  POLYBENCH_2D_ARRAY_DECL(P_i, DATA_TYPE, N-M, N-M, n-m, n-m);
   POLYBENCH_1D_ARRAY_DECL(wa_r, DATA_TYPE, N-M, n-m);
   POLYBENCH_1D_ARRAY_DECL(wa_i, DATA_TYPE, N-M, n-m);
   DATA_TYPE yp_r;
