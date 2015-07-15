@@ -2,7 +2,7 @@
 #define __LMS_H
 
 /* Constant value */
-#define NB_RUN 100
+#define NB_RUN 50
 
 //ALPHA is a positive constant that controls the convergence speed of the algo.
 #define ALPHA 4.2
@@ -51,13 +51,13 @@
 # if !defined(N) || !defined(M)
 /* Define sample dataset sizes. */
 #  ifdef MINI_DATASET
-#   define N 20
-#   define M 5
+#   define N 50
+#   define M 15
 #  endif 
 
 #  ifdef SMALL_DATASET
-#   define N 100
-#   define M 20
+#   define N 150
+#   define M 45
 #  endif 
 
 #  ifdef MEDIUM_DATASET
@@ -66,13 +66,13 @@
 #  endif 
 
 #  ifdef LARGE_DATASET
-#   define N 750
-#   define M 180
+#   define N 1600
+#   define M 400
 #  endif 
 
 #  ifdef EXTRALARGE_DATASET
-#   define N 1000
-#   define M 250
+#   define N 4500
+#   define M 1000
 #  endif 
 
 #endif /* !(N) || !(M) */

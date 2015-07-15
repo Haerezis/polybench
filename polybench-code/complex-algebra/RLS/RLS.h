@@ -2,12 +2,12 @@
 #define __RLS_H
 
 /* Constant value */
-#define NB_RUN 100
+#define NB_RUN 50
 
 //ALPHA is a positive constant that controls the convergence speed of the algo.
 #define ALPHA 4.2
 
-#define MU 4.2
+#define MU 1.0
 
 #define MAX_VALUE 10.0
 
@@ -53,28 +53,28 @@
 # if !defined(N) || !defined(M)
 /* Define sample dataset sizes. */
 #  ifdef MINI_DATASET
-#   define N 20
+#   define N 25
 #   define M 5
 #  endif 
 
 #  ifdef SMALL_DATASET
-#   define N 100
+#   define N 80
 #   define M 20
 #  endif 
 
 #  ifdef MEDIUM_DATASET
-#   define N 400
-#   define M 100
+#   define N 230
+#   define M 50
 #  endif 
 
 #  ifdef LARGE_DATASET
-#   define N 750
-#   define M 180
+#   define N 900
+#   define M 200
 #  endif 
 
 #  ifdef EXTRALARGE_DATASET
-#   define N 1000
-#   define M 250
+#   define N 2600
+#   define M 550
 #  endif 
 
 #endif /* !(N) || !(M) */
