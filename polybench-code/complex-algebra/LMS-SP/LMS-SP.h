@@ -41,6 +41,12 @@
 # endif
 
 
+typedef struct compex_number {
+  DATA_TYPE r;
+  DATA_TYPE i;
+} complex_number_t, * complex_number_p;
+
+
 
 /* Default to LARGE_DATASET. */
 # if !defined(MINI_DATASET) && !defined(SMALL_DATASET) && !defined(MEDIUM_DATASET) && !defined(LARGE_DATASET) && !defined(EXTRALARGE_DATASET)
