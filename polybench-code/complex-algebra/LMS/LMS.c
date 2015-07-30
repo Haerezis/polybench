@@ -20,8 +20,8 @@ void update_array(int n,
 
   for(i = 0 ; i<n ; i++)
   {
-    x[i].r = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
-    x[i].i = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
+    x[i].r = ((DATA_TYPE)(rand()+1)/(DATA_TYPE)(RAND_MAX)) * MAX_VALUE;
+    x[i].i = ((DATA_TYPE)(rand()+1)/(DATA_TYPE)(RAND_MAX)) * MAX_VALUE;
   }
 }
 
@@ -44,16 +44,16 @@ void init_array(int n, int m,
 
   for(i = 0 ; i<n ; i++)
   {
-    wq[i].r = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
-    wq[i].i = ((float)(rand()+1)/(float)(RAND_MAX)) * MAX_VALUE;
+    wq[i].r = ((DATA_TYPE)(rand()+1)/(DATA_TYPE)(RAND_MAX)) * MAX_VALUE;
+    wq[i].i = ((DATA_TYPE)(rand()+1)/(DATA_TYPE)(RAND_MAX)) * MAX_VALUE;
 
     w[i].r = 0.0;
     w[i].i = 0.0;
 
     for (j = 0 ; j<(n-m) ; j++)
     {
-      B[i][j].r = ((float)(rand()+1)/(float)(RAND_MAX)) * 10.0;
-      B[i][j].i = ((float)(rand()+1)/(float)(RAND_MAX)) * 10.0;
+      B[i][j].r = ((DATA_TYPE)(rand()+1)/(DATA_TYPE)(RAND_MAX)) * 10.0;
+      B[i][j].i = ((DATA_TYPE)(rand()+1)/(DATA_TYPE)(RAND_MAX)) * 10.0;
     }
   }
   
