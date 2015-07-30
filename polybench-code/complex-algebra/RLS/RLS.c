@@ -33,6 +33,7 @@ void init_array(int n, int m,
     complex_number_t POLYBENCH_2D(B, N, N-M, n, n-m),
     complex_number_t * yc,
     complex_number_t POLYBENCH_1D(z, N-M, n-m),
+    complex_number_t POLYBENCH_1D(zP, N-M, n-m),
     complex_number_t POLYBENCH_1D(Pz, N-M, n-m),
     complex_number_t POLYBENCH_1D(g, N-M, n-m),
     complex_number_t POLYBENCH_2D(gz, N-M, N-M, n-m, n-m),
@@ -81,6 +82,9 @@ void init_array(int n, int m,
     Pz[i].r = 0.0;
     Pz[i].i = 0.0;
 
+    zP[i].r = 0.0;
+    zP[i].i = 0.0;
+
     for (j = 0 ; j<(n-m) ; j++)
     {
       P[i][j].r = 0.0;
@@ -124,6 +128,7 @@ void kernel_LMS_GSC(int n, int m,
     complex_number_t POLYBENCH_2D(B, N, N-m, n, n-m),
     complex_number_t * yc,
     complex_number_t POLYBENCH_1D(z, N-M, n-m),
+    complex_number_t POLYBENCH_1D(zP, N-M, n-m),
     complex_number_t POLYBENCH_1D(Pz, N-M, n-m),
     complex_number_t POLYBENCH_1D(g, N-M, n-m),
     complex_number_t POLYBENCH_2D(gz, N-M, N-M, n-m, n-m),
@@ -145,6 +150,8 @@ void kernel_LMS_GSC(int n, int m,
 
 #pragma scop
   //2. y_c(k) = w_q^{H} * x(k)
+  yc->r = 0.0;
+  yc->i = 0.0;
   for( i = 0 ; i<n ; i++)
   {
     yc->r += (wq[i].r * x[i].r) - ((-wq[i].i) * x[i].i);
@@ -153,19 +160,23 @@ void kernel_LMS_GSC(int n, int m,
   }
 
   //3. z(k) = B^{H} * x(k)
-  for (j = 0 ; j<(n-m) ; j++)
+  for (i = 0 ; i<(n-m) ; i++)
   {
-    z[j].r = 0.0;
-    z[j].i = 0.0;
-
-    for(i = 0 ; i<n ; i++)
+    z[i].r = 0.0;
+    z[i].i = 0.0;
+  }
+  for(j = 0 ; j<n ; j++)
+  {
+    for (i = 0 ; i<(n-m) ; i++)
     {
-      z[j].r += (B[i][j].r * x[i].r) - ((-B[i][j].i) * x[i].i);
-      z[j].i += ((-B[i][j].i) * x[i].r) + (B[i][j].r * x[i].i);
+      z[i].r += (B[j][i].r * x[j].r) - ((-B[j][i].i) * x[j].i);
+      z[i].i += ((-B[j][i].i) * x[j].r) + (B[j][i].r * x[j].i);
     }
   }
 
   //4. y_p(k) = y_c(k) - w_a^H(k-1) * z(k)
+  waz.r = 0.0;
+  waz.i = 0.0;
   for (i = 0 ; i < (n-m) ; i++)
   {
     waz.r += (wa[i].r * z[i].r) - ((-wa[i].i) * z[i].i);
@@ -180,7 +191,10 @@ void kernel_LMS_GSC(int n, int m,
   {
     Pz[i].r = 0.0;
     Pz[i].i = 0.0;
-    for (j = 0 ; j < (n-m) ; j++)
+  }
+  for (j = 0 ; j < (n-m) ; j++)
+  {
+    for (i = 0 ; i < (n-m) ; i++)
     {
       Pz[i].r += (P[j][i].r * z[j].r) - (P[j][i].i * z[j].i);
       Pz[i].i += (P[j][i].r * z[j].i) + (P[j][i].i * z[j].r);
@@ -195,7 +209,6 @@ void kernel_LMS_GSC(int n, int m,
   tmp.i += MU;
   tmp_norm_pow2 = tmp.r * tmp.r + tmp.i * tmp.i;
 
-
   for (i = 0 ; i < (n-m) ; i++)
   {
     g[i].r = ((Pz[i].r * tmp.r) - (Pz[i].i * (-tmp.i))) / tmp_norm_pow2;
@@ -206,23 +219,24 @@ void kernel_LMS_GSC(int n, int m,
   //6. P(k) = μ^{-1} * (P(k-1) - g(k) * z^H(k) * P(k-1))
   for (i = 0 ; i < (n-m) ; i++)
   {
-    for (j = 0 ; j < (n-m) ; j++)
-    {
-      gz[i][j].r = (g[i].r * z[j].r) - (g[i].i * (-z[j].i));
-      gz[i][j].i = (g[i].i * z[j].r) + (g[i].r * (-z[j].i));
-    }
+    zP[i].r = 0.0;
+    zP[i].i = 0.0;
   }
   for (i = 0 ; i < (n-m) ; i++)
   {
     for (j = 0 ; j < (n-m) ; j++)
     {
-      gPz.r = 0.0;
-      gPz.i = 0.0;
-      for (k = 0 ; k< (n-m) ; k++)
-      {
-        gPz.r += (gz[i][k].r * P[j][k].r) - (gz[i][k].i * P[j][k].i);
-        gPz.r += (gz[i][k].r * P[j][k].i) - (gz[i][k].i * P[j][k].r);
-      }
+      zP[j].r += (z[j].r * P[i][j].r) - ((-z[j].i) * P[i][j].i);
+      zP[j].i += ((-z[j].i) * P[i][j].r) + (z[j].r * P[i][j].i);
+    }
+  }
+
+  for (i = 0 ; i < (n-m) ; i++)
+  {
+    for (j = 0 ; j < (n-m) ; j++)
+    {
+      gPz.r = (g[i].r * zP[j].r) - (g[i].i * zP[j].i);
+      gPz.i = (g[i].r * zP[j].i) - (g[i].i * zP[j].r);
       P[j][i].r = (P[j][i].r - gPz.r) / MU;
       P[j][i].i = (P[j][i].i - gPz.i) / MU;
     }
@@ -239,7 +253,8 @@ void kernel_LMS_GSC(int n, int m,
   //8. w(k) = w_q - B * w_a(k)
   for (i = 0 ; i < n ; i++)
   {
-    Bwa = (complex_number_t) {0.0, 0.0};
+    Bwa.r = 0.0;
+    Bwa.i = 0.0;
 
     for (j = 0 ; j < (n-m) ; j++)
     {
@@ -249,8 +264,6 @@ void kernel_LMS_GSC(int n, int m,
     w[i].r = wq[i].r - Bwa.r;
     w[i].i = wq[i].i - Bwa.i;
   }
-
-
 #pragma endscop
 
 }
@@ -271,6 +284,7 @@ int main(int argc, char** argv)
   POLYBENCH_2D_ARRAY_DECL(B, complex_number_t, N, N-m, n, n-m);
   complex_number_t yc;
   POLYBENCH_1D_ARRAY_DECL(z, complex_number_t, N-M, n-m);
+  POLYBENCH_1D_ARRAY_DECL(zP, complex_number_t, N-M, n-m);
   POLYBENCH_1D_ARRAY_DECL(Pz, complex_number_t, N-M, n-m);
   POLYBENCH_1D_ARRAY_DECL(g, complex_number_t, N-M, n-m);
   POLYBENCH_2D_ARRAY_DECL(gz, complex_number_t, N, N-M, n-m, n-m);
@@ -287,6 +301,7 @@ int main(int argc, char** argv)
       POLYBENCH_ARRAY(B),
       &yc,
       POLYBENCH_ARRAY(z),
+      POLYBENCH_ARRAY(zP),
       POLYBENCH_ARRAY(Pz),
       POLYBENCH_ARRAY(g),
       POLYBENCH_ARRAY(gz),
@@ -312,6 +327,7 @@ int main(int argc, char** argv)
         POLYBENCH_ARRAY(B),
         &yc,
         POLYBENCH_ARRAY(z),
+        POLYBENCH_ARRAY(zP),
         POLYBENCH_ARRAY(Pz),
         POLYBENCH_ARRAY(g),
         POLYBENCH_ARRAY(gz),
@@ -334,6 +350,7 @@ int main(int argc, char** argv)
   POLYBENCH_FREE_ARRAY(wq);
   POLYBENCH_FREE_ARRAY(B);
   POLYBENCH_FREE_ARRAY(z);
+  POLYBENCH_FREE_ARRAY(zP);
   POLYBENCH_FREE_ARRAY(Pz);
   POLYBENCH_FREE_ARRAY(g);
   POLYBENCH_FREE_ARRAY(gz);
