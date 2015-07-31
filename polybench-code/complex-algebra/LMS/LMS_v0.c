@@ -3,6 +3,13 @@
 #include <string.h>
 #include <math.h>
 
+
+/*
+ * The LMS algorithm was taken from the following paper :
+ * "Application of Adaptive Beamforming Techniques to HF Radar"
+ * written by Peter Vouras and Brian Freburger.
+ */
+
 /* Include polybench common header. */
 #include <polybench.h>
 

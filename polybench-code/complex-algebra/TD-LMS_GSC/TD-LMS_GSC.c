@@ -3,6 +3,12 @@
 #include <string.h>
 #include <math.h>
 
+/*
+ * The TD-LMS_GSC algorithm was taken from the paper
+ * "IMPLEMENTATION OF ADAPTIVE GENERALIZED SIDELOBE CANCELLERS USING EFFICIENT
+ * COMPLEX VALUED ARITHMETIC" written by GEORGE-OTHON GLENTIS.
+ */
+
 /* Include polybench common header. */
 #include <polybench.h>
 

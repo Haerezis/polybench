@@ -3,6 +3,12 @@
 #include <string.h>
 #include <math.h>
 
+/* 
+ * The LCMP algorithm was taken from the following paper :
+ * "A Recursive Least Squares Implementation for
+ * LCMP Beamforming Under Quadratic Constraint
+ */
+
 /* Include polybench common header. */
 #include <polybench.h>
 
