@@ -90,7 +90,7 @@ void print_array(complex_number_t e)
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
 static
-void kernel_LMS_GSC(int k, int mu, int p,
+void kernel_TD_LMS_GSC(int k, int mu, int p,
     complex_number_t d,
     complex_number_t POLYBENCH_2D(X, K, P-1, k, p-1),
     complex_number_t POLYBENCH_1D(u, K, k),
@@ -196,7 +196,7 @@ int main(int argc, char** argv)
   /* Run kernel. */
   for (i = 0 ; i < N ; i++)
   {
-    kernel_LMS_GSC (k,
+    kernel_TD_LMS_GSC (k,
         mu,
         p,
         d,

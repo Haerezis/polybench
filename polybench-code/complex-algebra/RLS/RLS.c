@@ -122,7 +122,7 @@ void print_array(int n,
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
 static
-void kernel_LMS_GSC(int n, int m,
+void kernel_RLS(int n, int m,
     complex_number_t POLYBENCH_1D(x, N, n),
     complex_number_t POLYBENCH_1D(wq, N, n),
     complex_number_t POLYBENCH_2D(B, N, N-m, n, n-m),
@@ -137,7 +137,7 @@ void kernel_LMS_GSC(int n, int m,
     complex_number_t * yp,
     complex_number_t POLYBENCH_1D(w, N, n))
 {
-  unsigned int i = 0, j = 0, k = 0;
+  unsigned int ii = 0, j = 0, k = 0;
 
   complex_number_t tmp = (complex_number_t) {0.0, 0.0};
   DATA_TYPE tmp_norm_pow2 = 0;
@@ -152,117 +152,117 @@ void kernel_LMS_GSC(int n, int m,
   //2. y_c(k) = w_q^{H} * x(k)
   yc->r = 0.0;
   yc->i = 0.0;
-  for( i = 0 ; i<n ; i++)
+  for( ii = 0 ; ii<n ; ii++)
   {
-    yc->r += (wq[i].r * x[i].r) - ((-wq[i].i) * x[i].i);
-    yc->i += ((-wq[i].i) * x[i].r) + (wq[i].r * x[i].i);
+    yc->r += (wq[ii].r * x[ii].r) - ((-wq[ii].i) * x[ii].i);
+    yc->i += ((-wq[ii].i) * x[ii].r) + (wq[ii].r * x[ii].i);
     
   }
 
   //3. z(k) = B^{H} * x(k)
-  for (i = 0 ; i<(n-m) ; i++)
+  for (ii = 0 ; ii<(n-m) ; ii++)
   {
-    z[i].r = 0.0;
-    z[i].i = 0.0;
+    z[ii].r = 0.0;
+    z[ii].i = 0.0;
   }
   for(j = 0 ; j<n ; j++)
   {
-    for (i = 0 ; i<(n-m) ; i++)
+    for (ii = 0 ; ii<(n-m) ; ii++)
     {
-      z[i].r += (B[j][i].r * x[j].r) - ((-B[j][i].i) * x[j].i);
-      z[i].i += ((-B[j][i].i) * x[j].r) + (B[j][i].r * x[j].i);
+      z[ii].r += (B[j][ii].r * x[j].r) - ((-B[j][ii].i) * x[j].i);
+      z[ii].i += ((-B[j][ii].i) * x[j].r) + (B[j][ii].r * x[j].i);
     }
   }
 
   //4. y_p(k) = y_c(k) - w_a^H(k-1) * z(k)
   waz.r = 0.0;
   waz.i = 0.0;
-  for (i = 0 ; i < (n-m) ; i++)
+  for (ii = 0 ; ii < (n-m) ; ii++)
   {
-    waz.r += (wa[i].r * z[i].r) - ((-wa[i].i) * z[i].i);
-    waz.i += (-wa[i].i)*z[i].r + wa[i].r*z[i].i;
+    waz.r += (wa[ii].r * z[ii].r) - ((-wa[ii].i) * z[ii].i);
+    waz.i += (-wa[ii].i)*z[ii].r + wa[ii].r*z[ii].i;
   }
   yp[0].r = yc[0].r - waz.r;
   yp[0].i = yc[0].i - waz.i;
 
   //5. g(k) = P(k-1) * z(k) / (μ + z^H(k) * P(k-1) * z(k))
   //where μ was set equal to 1
-  for (i = 0 ; i < (n-m) ; i++)
+  for (ii = 0 ; ii < (n-m) ; ii++)
   {
-    Pz[i].r = 0.0;
-    Pz[i].i = 0.0;
+    Pz[ii].r = 0.0;
+    Pz[ii].i = 0.0;
   }
   for (j = 0 ; j < (n-m) ; j++)
   {
-    for (i = 0 ; i < (n-m) ; i++)
+    for (ii = 0 ; ii < (n-m) ; ii++)
     {
-      Pz[i].r += (P[j][i].r * z[j].r) - (P[j][i].i * z[j].i);
-      Pz[i].i += (P[j][i].r * z[j].i) + (P[j][i].i * z[j].r);
+      Pz[ii].r += (P[j][ii].r * z[j].r) - (P[j][ii].i * z[j].i);
+      Pz[ii].i += (P[j][ii].r * z[j].i) + (P[j][ii].i * z[j].r);
     }
   }
-  for (i = 0 ; i < (n-m) ; i++)
+  for (ii = 0 ; ii < (n-m) ; ii++)
   {
-    tmp.r += (z[i].r * Pz[i].r) - ((-z[i].i) * Pz[i].i);
-    tmp.i += (-z[i].i)*Pz[i].r + z[i].r*Pz[i].i;
+    tmp.r += (z[ii].r * Pz[ii].r) - ((-z[ii].i) * Pz[ii].i);
+    tmp.i += (-z[ii].i)*Pz[ii].r + z[ii].r*Pz[ii].i;
   }
   tmp.r += MU;
   tmp.i += MU;
   tmp_norm_pow2 = tmp.r * tmp.r + tmp.i * tmp.i;
 
-  for (i = 0 ; i < (n-m) ; i++)
+  for (ii = 0 ; ii < (n-m) ; ii++)
   {
-    g[i].r = ((Pz[i].r * tmp.r) - (Pz[i].i * (-tmp.i))) / tmp_norm_pow2;
-    g[i].i = ((Pz[i].r * (-tmp.i)) + (Pz[i].i * tmp.r)) / tmp_norm_pow2;
+    g[ii].r = ((Pz[ii].r * tmp.r) - (Pz[ii].i * (-tmp.i))) / tmp_norm_pow2;
+    g[ii].i = ((Pz[ii].r * (-tmp.i)) + (Pz[ii].i * tmp.r)) / tmp_norm_pow2;
   }
 
 
   //6. P(k) = μ^{-1} * (P(k-1) - g(k) * z^H(k) * P(k-1))
-  for (i = 0 ; i < (n-m) ; i++)
+  for (ii = 0 ; ii < (n-m) ; ii++)
   {
-    zP[i].r = 0.0;
-    zP[i].i = 0.0;
+    zP[ii].r = 0.0;
+    zP[ii].i = 0.0;
   }
-  for (i = 0 ; i < (n-m) ; i++)
+  for (ii = 0 ; ii < (n-m) ; ii++)
   {
     for (j = 0 ; j < (n-m) ; j++)
     {
-      zP[j].r += (z[j].r * P[i][j].r) - ((-z[j].i) * P[i][j].i);
-      zP[j].i += ((-z[j].i) * P[i][j].r) + (z[j].r * P[i][j].i);
+      zP[j].r += (z[j].r * P[ii][j].r) - ((-z[j].i) * P[ii][j].i);
+      zP[j].i += ((-z[j].i) * P[ii][j].r) + (z[j].r * P[ii][j].i);
     }
   }
 
-  for (i = 0 ; i < (n-m) ; i++)
+  for (ii = 0 ; ii < (n-m) ; ii++)
   {
     for (j = 0 ; j < (n-m) ; j++)
     {
-      gPz.r = (g[i].r * zP[j].r) - (g[i].i * zP[j].i);
-      gPz.i = (g[i].r * zP[j].i) - (g[i].i * zP[j].r);
-      P[j][i].r = (P[j][i].r - gPz.r) / MU;
-      P[j][i].i = (P[j][i].i - gPz.i) / MU;
+      gPz.r = (g[ii].r * zP[j].r) - (g[ii].i * zP[j].i);
+      gPz.i = (g[ii].r * zP[j].i) - (g[ii].i * zP[j].r);
+      P[j][ii].r = (P[j][ii].r - gPz.r) / MU;
+      P[j][ii].i = (P[j][ii].i - gPz.i) / MU;
     }
   }
 
   
   //7. w_a(k) = w_a(k-1) + g(k) * y_p^{*}(k)
-  for (i = 0 ; i < (n-m) ; i++)
+  for (ii = 0 ; ii < (n-m) ; ii++)
   {
-    wa[i].r = wa[i].r + ((g[i].r * yp[0].r) - (g[i].i * (-yp[0].i)));
-    wa[i].i = wa[i].i + ((g[i].i * (-yp[0].i)) - (g[i].r * yp[0].r));
+    wa[ii].r = wa[ii].r + ((g[ii].r * yp[0].r) - (g[ii].i * (-yp[0].i)));
+    wa[ii].i = wa[ii].i + ((g[ii].i * (-yp[0].i)) - (g[ii].r * yp[0].r));
   }
 
   //8. w(k) = w_q - B * w_a(k)
-  for (i = 0 ; i < n ; i++)
+  for (ii = 0 ; ii < n ; ii++)
   {
     Bwa.r = 0.0;
     Bwa.i = 0.0;
 
     for (j = 0 ; j < (n-m) ; j++)
     {
-      Bwa.r += B[i][j].r * wa[j].r - B[i][j].i * wa[j].i;
-      Bwa.i += B[i][j].r * wa[j].i - B[i][j].i * wa[j].r;
+      Bwa.r += B[ii][j].r * wa[j].r - B[ii][j].i * wa[j].i;
+      Bwa.i += B[ii][j].r * wa[j].i - B[ii][j].i * wa[j].r;
     }
-    w[i].r = wq[i].r - Bwa.r;
-    w[i].i = wq[i].i - Bwa.i;
+    w[ii].r = wq[ii].r - Bwa.r;
+    w[ii].i = wq[ii].i - Bwa.i;
   }
 #pragma endscop
 
@@ -321,7 +321,7 @@ int main(int argc, char** argv)
     update_array(n,
         POLYBENCH_ARRAY(x));
 
-    kernel_LMS_GSC (n, m,
+    kernel_RLS (n, m,
         POLYBENCH_ARRAY(x),
         POLYBENCH_ARRAY(wq),
         POLYBENCH_ARRAY(B),

@@ -106,7 +106,7 @@ void print_array(int n,
 /* Main computational kernel. The whole function will be timed,
    including the call and return. */
 static
-void kernel_LMS_GSC(int n, int m,
+void kernel_LMS(int n, int m,
     DATA_TYPE POLYBENCH_1D(x_r, N, n),
     DATA_TYPE POLYBENCH_1D(x_i, N, n),
     DATA_TYPE POLYBENCH_1D(wq_r, N, n),
@@ -249,7 +249,7 @@ int main(int argc, char** argv)
         POLYBENCH_ARRAY(x_r),
         POLYBENCH_ARRAY(x_i));
 
-    kernel_LMS_GSC (n, m,
+    kernel_LMS (n, m,
         POLYBENCH_ARRAY(x_r),
         POLYBENCH_ARRAY(x_i),
         POLYBENCH_ARRAY(wq_r),
