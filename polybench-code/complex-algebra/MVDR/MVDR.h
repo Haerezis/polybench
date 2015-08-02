@@ -53,23 +53,23 @@ typedef struct compex_number {
 # if !defined(N) 
 /* Define sample dataset sizes. */
 #  ifdef MINI_DATASET
-#   define N 50
+#   define N 16
 #  endif 
 
 #  ifdef SMALL_DATASET
-#   define N 150
+#   define N 55
 #  endif 
 
 #  ifdef MEDIUM_DATASET
-#   define N 400
+#   define N 160
 #  endif 
 
 #  ifdef LARGE_DATASET
-#   define N 1600
+#   define N 800
 #  endif 
 
 #  ifdef EXTRALARGE_DATASET
-#   define N 4500
+#   define N 1750
 #  endif 
 
 #endif /* !(N) */

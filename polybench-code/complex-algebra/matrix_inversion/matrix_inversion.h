@@ -9,28 +9,26 @@
 #  define LARGE_DATASET
 # endif
 
-#define MAT_SIZE 3
-
 # if !defined(MAT_SIZE) && !defined(MAT_SIZE)
 /* Define sample dataset sizes. */
 #  ifdef MINI_DATASET
-#   define MAT_SIZE 32
+#   define MAT_SIZE 20
 #  endif 
 
 #  ifdef SMALL_DATASET
-#   define MAT_SIZE 100
+#   define MAT_SIZE 55
 #  endif 
 
 #  ifdef MEDIUM_DATASET
-#   define MAT_SIZE 260
+#   define MAT_SIZE 160
 #  endif 
 
 #  ifdef LARGE_DATASET
-#   define MAT_SIZE 1400
+#   define MAT_SIZE 800
 #  endif 
 
 #  ifdef EXTRALARGE_DATASET
-#   define MAT_SIZE 3000
+#   define MAT_SIZE 1750
 #  endif 
 
 
