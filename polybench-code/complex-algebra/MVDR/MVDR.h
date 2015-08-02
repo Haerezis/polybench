@@ -2,8 +2,6 @@
 #define __MVDR_H
 
 /* Constant value */
-#define NB_RUN 50
-
 //ALPHA is a positive constant that controls the convergence speed of the algo.
 #define ALPHA 4.2
 

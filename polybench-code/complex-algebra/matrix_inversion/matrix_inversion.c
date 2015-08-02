@@ -30,6 +30,7 @@ void init_array (unsigned int mat_size,
       /*M[l][c].r = ((DATA_TYPE)(rand()+1)/(DATA_TYPE)(RAND_MAX)) * MAX_VALUE;*/
       /*M[l][c].i = ((DATA_TYPE)(rand()+1)/(DATA_TYPE)(RAND_MAX)) * MAX_VALUE;*/
       M[l][c].r = inc++;
+      M[l][c].i = 0.0;
 
       M_inv[c][l].r = 0.0;
       M_inv[c][l].i = 0.0;
@@ -40,8 +41,8 @@ void init_array (unsigned int mat_size,
       R[l][c].r = 0.0;
       R[l][c].i = 0.0;
 
-      R_inv[c][l].r = 0.0;
-      R_inv[c][l].i = 0.0;
+      R_inv[l][c].r = 0.0;
+      R_inv[l][c].i = 0.0;
     }
   M[MAT_SIZE-1][MAT_SIZE-1].r = 0.0;
 }
@@ -225,6 +226,9 @@ int main(int argc, char** argv)
   /* Be clean. */
   POLYBENCH_FREE_ARRAY(M);
   POLYBENCH_FREE_ARRAY(M_inv);
+  POLYBENCH_FREE_ARRAY(Q);
+  POLYBENCH_FREE_ARRAY(R);
+  POLYBENCH_FREE_ARRAY(R_inv);
 
   return 0;
 }
